@@ -1,0 +1,70 @@
+import org.springframework.boot.gradle.plugin.SpringBootPlugin
+
+plugins {
+    id "org.springframework.boot" version "${springBootVersion}"
+    id "io.spring.dependency-management" version "${springDependencyManangementVersion}"
+}
+
+dependencyManagement {
+    imports {
+        mavenBom(SpringBootPlugin.BOM_COORDINATES)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+apply plugin: "java"
+
+group = "rocks.inspectit"
+version = "0.1"
+
+java {
+    sourceCompatibility = "17"
+    targetCompatibility = "17"
+}
+
+bootJar {
+    enabled = false
+}
+
+test {
+    useJUnitPlatform()
+}
+
+dependencies {
+    implementation(
+            "org.springframework.boot:spring-boot-starter",
+
+            "io.opencensus:opencensus-api:${openCensusVersion}",
+            "io.opencensus:opencensus-impl:${openCensusVersion}",
+            "io.opencensus:opencensus-testing:${openCensusVersion}",
+
+            platform("io.opentelemetry:opentelemetry-bom-alpha:${openTelemetryAlphaVersion}"),
+            platform("io.opentelemetry:opentelemetry-bom:${openTelemetryVersion}"),
+            "io.opentelemetry:opentelemetry-sdk:${openTelemetryVersion}",
+            "io.opentelemetry:opentelemetry-sdk-metrics:${openTelemetryVersion}",
+            "io.opentelemetry:opentelemetry-exporter-otlp:${openTelemetryVersion}",
+            "io.opentelemetry:opentelemetry-sdk-testing:${openTelemetryVersion}",
+            "io.opentelemetry.semconv:opentelemetry-semconv:${openTelemetrySemConvVersion}",
+            "io.opentelemetry.proto:opentelemetry-proto:${openTelemetryProtoVersion}",
+            "io.opentelemetry:opentelemetry-opencensus-shim:${openTelemetryAlphaVersion}",
+
+            "com.google.protobuf:protobuf-java:${protobufVersion}",
+            "com.google.protobuf:protobuf-java-util:${protobufVersion}",
+    )
+
+    testImplementation(
+            "org.springframework.boot:spring-boot-starter-test",
+
+            "io.grpc:grpc-context:${grpcVersion}",
+            "com.linecorp.armeria:armeria-junit5:${armeriaVersion}",
+            "com.linecorp.armeria:armeria-grpc-protocol:${armeriaVersion}",
+
+            "org.testcontainers:testcontainers:${testContainersVersion}",
+            "org.testcontainers:junit-jupiter:${testContainersVersion}"
+    )
+
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
+}
