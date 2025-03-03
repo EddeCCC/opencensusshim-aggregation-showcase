@@ -1,31 +1,22 @@
-# span-exporter-showcase
+# opencensusshim-aggregation-showcase
 
 ## Origin
 
-The project originates from [inspectit-eum-server](https://github.com/inspectIT/inspectit-ocelot-eum-server).
-In summary, the server is used to receive data (metrics & traces) collected from browsers and process them as OpenTelemetry-data.
-This showcase extracts only the part responsible for traces.
+The project originates from [inspectit-ocelot](https://github.com/inspectIT/inspectit-ocelot).
+In summary, it is a Java agent to collect metrics with OpenCensus and export them via OTLP.
+This showcase extracts only the relevant parts to configure the AggregationTemporality & export metrics.
 
 ---
 
-## Data flow
-The showcase provides one REST endpoint: `/spans`
-
-It expects to receive span proto data, which will be converted to OpenTelemetry SDK spans. 
-After that, the SDK spans will be exported via OTLP to a collector.
-
-## Data origin
-
-The received span proto data is created by [opentelemetry-exporter-trace-otlp-http](https://github.com/open-telemetry/opentelemetry-js/tree/main/experimental/packages/exporter-trace-otlp-http)
-
-More precisely, we use this plugin to generate traces:
-https://github.com/NovatecConsulting/boomerang-opentelemetry-plugin
-
-There is an example for such data in the [test resources](src/test/resources/ot-trace-array-v0.48.0.json).
-
 ## Test case
 
-The test class [OtlpGrpcTraceExporterIntTest](src/test/java/rocks/inspectit/oce/eum/server/exporters/tracing/OtlpGrpcTraceExporterIntTest.java) 
-tries to send data to the `/spans` and checks if the expected trace data will be exported by OTLP.
+The OpenCensus metrics are created in the application. Via the OpenCensus-shim, they are exported via OTLP to an
+OTel collector. This collector exports the metrics to a GRPC server via OTLP.
+The server is used to validate the metrics.
 
-The test `verifyTraceWithArrayValueSent()` fails with a `java.lang.ClassCastException`.
+The MetricExporter is configured to always prefer DELTA AggregationTemporality.
+The test will export two values. First the value 1. 
+After the value was received by the GRPC server, the value 2 will be recorded.
+This will increase the sum of the measurement to 3. 
+However, since we want to export delta values, we expect to export the value 2.
+The test fails, because the second exported value is actually 3 instead of 2.
